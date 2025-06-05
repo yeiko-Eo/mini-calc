@@ -189,61 +189,45 @@ main_window.after(0, lambda: apply_styles())
 screen = tk.Entry(main_window, width=16, bd=0, justify="right")
 screen.grid(row=0, column=0, columnspan=4, padx=12, pady=20, ipady=18, sticky="nsew")
 
-# Buttons
-button_7 = tk.Button(main_window, text='7', width=5, command=lambda: print_onto_screen(7))
-button_7.grid(row=1, column=0, padx=2, pady=2, sticky="nsew")
+# Buttons, texts and the like
+buttons = [
+    # row 1
+    ('7', 1, 0, 'num'), ('8', 1, 1, 'num'), ('9', 1, 2, 'num'), ('/', 1, 3, 'op'),
+    # row 2
+    ('4', 2, 0, 'num'), ('5', 2, 1, 'num'), ('6', 2, 2, 'num'), ('*', 2, 3, 'op'),
+    # row 3
+    ('1', 3, 0, 'num'), ('2', 3, 1, 'num'), ('3', 3, 2, 'num'), ('-', 3, 3, 'op'),
+    # row 4
+    ('.', 4, 0, 'num'), ('0', 4, 1, 'num'), ('=', 4, 2, 'equal'), ('+', 4, 3, 'op'),
+    # row 5
+    ('C', 5, 0, 'clear'), ('⌫', 5, 2, 'delete')  # Ojo: el '⌫' abarca col=2 y col=3
+]
 
-button_8 = tk.Button(main_window, text='8', width=5, command=lambda: print_onto_screen(8))
-button_8.grid(row=1, column=1, padx=2, pady=2, sticky="nsew")
+# Create the buttons
+for text, row, col, btype in buttons:
+    if btype == 'num':
+        cmd = lambda val=text: print_onto_screen(val)
+    elif btype == 'op':
+        cmd = lambda op=text: save_operate(op, screen.get())
+    elif btype == 'equal':
+        cmd = calculate_result
+    elif btype == 'clear':
+        cmd = erase
+    elif btype == 'delete':
+        cmd = delete_last_char
+    else:
+        continue  # Ignore types not set up
 
-button_9 = tk.Button(main_window, text='9', width=5, command=lambda: print_onto_screen(9))
-button_9.grid(row=1, column=2, padx=2, pady=2, sticky="nsew")
+    btn = tk.Button(main_window, text=text, width=5, command=cmd)
 
-button_div = tk.Button(main_window, text='/', width=5, command=lambda: save_operate('/', screen.get()))
-button_div.grid(row=1, column=3, padx=2, pady=2, sticky="nsew")
-
-button_4 = tk.Button(main_window, text='4', width=5, command=lambda: print_onto_screen(4))
-button_4.grid(row=2, column=0, padx=2, pady=2, sticky="nsew")
-
-button_5 = tk.Button(main_window, text='5', width=5, command=lambda: print_onto_screen(5))
-button_5.grid(row=2, column=1, padx=2, pady=2, sticky="nsew")
-
-button_6 = tk.Button(main_window, text='6', width=5, command=lambda: print_onto_screen(6))
-button_6.grid(row=2, column=2, padx=2, pady=2, sticky="nsew")
-
-button_mult = tk.Button(main_window, text='*', width=5, command=lambda: save_operate('*', screen.get()))
-button_mult.grid(row=2, column=3, padx=2, pady=2, sticky="nsew")
-
-button_1 = tk.Button(main_window, text='1', width=5, command=lambda: print_onto_screen(1))
-button_1.grid(row=3, column=0, padx=2, pady=2, sticky="nsew")
-
-button_2 = tk.Button(main_window, text='2', width=5, command=lambda: print_onto_screen(2))
-button_2.grid(row=3, column=1, padx=2, pady=2, sticky="nsew")
-
-button_3 = tk.Button(main_window, text='3', width=5, command=lambda: print_onto_screen(3))
-button_3.grid(row=3, column=2, padx=2, pady=2, sticky="nsew")
-
-button_minus = tk.Button(main_window, text='-', width=5, command=lambda: save_operate('-', screen.get()))
-button_minus.grid(row=3, column=3, padx=2, pady=2, sticky="nsew")
-
-button_dot = tk.Button(main_window, text='.', width=5, command=lambda: print_onto_screen('.'))
-button_dot.grid(row=4, column=0, padx=2, pady=2, sticky="nsew")
-
-button_0 = tk.Button(main_window, text='0', width=5, command=lambda: print_onto_screen(0))
-button_0.grid(row=4, column=1, padx=2, pady=2, sticky="nsew")
-
-button_result = tk.Button(main_window, text='=', width=5, command=calculate_result)
-button_result.grid(row=4, column=2, padx=2, pady=2, sticky="nsew")
-
-button_plus = tk.Button(main_window, text='+', width=5, command=lambda: save_operate('+', screen.get()))
-button_plus.grid(row=4, column=3, padx=2, pady=2, sticky="nsew")
-
-button_erase = tk.Button(main_window, text='C', width=5, command=erase)
-button_erase.grid(row=5, column=0, columnspan=2, padx=2, pady=2, sticky="nsew")
-button_erase.configure(bg="#A5A5A5", fg="#000000")
-
-button_delete = tk.Button(main_window, text='⌫', width=5, command=delete_last_char)
-button_delete.grid(row=5, column=2, columnspan=2, padx=2, pady=2, sticky="nsew")
-button_delete.configure(bg="#A5A5A5", fg="#000000")
+    # Let's set up the postitions
+    if text == 'C':
+        btn.grid(row=row, column=col, columnspan=2, padx=2, pady=2, sticky="nsew")
+        btn.configure(bg="#A5A5A5", fg="#000000")
+    elif text == '⌫':
+        btn.grid(row=row, column=col, columnspan=2, padx=2, pady=2, sticky="nsew")
+        btn.configure(bg="#A5A5A5", fg="#000000")
+    else:
+        btn.grid(row=row, column=col, padx=2, pady=2, sticky="nsew")
 
 main_window.mainloop()
