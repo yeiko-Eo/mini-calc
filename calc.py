@@ -2,48 +2,68 @@ import tkinter as tk
 
 # Main window
 main_window = tk.Tk()
-main_window.geometry("340x450")  # Set window size for a more calculator-like aspect ratio
+main_window.geometry("310x450")  # Set window size for a more calculator-like aspect ratio
 
 # Creating a list
 numbers = []
 operation = []
 
+
 # Functions
 def calculate_result():
     global numbers, operation
 
-    #Let's ordain the operations
+    current = screen.get()
+    if current and current != 'Insert a number':
+        numbers.append(current)  # Save the current number on screen before operating
+    else:
+        screen.delete(0, tk.END)
+        screen.insert(tk.END, 'Insert a number')
+        return
 
-    # Convert numbers to floats
-    nums = [float(n) for n in numbers]
+    if len(numbers) != len(operation) + 1:
+        screen.delete(0, tk.END)
+        screen.insert(tk.END, 'Invalid input')
+        numbers.clear()
+        operation.clear()
+        return
 
-    # Build expression list: number, operation, number, operation, etc
-    expr = [] # Creating a list
+    try:
+        nums = [float(n) for n in numbers]
+    except ValueError:
+        screen.delete(0, tk.END)
+        screen.insert(tk.END, 'Invalid number')
+        numbers.clear()
+        operation.clear()
+        return
+
+    expr = []
     for i in range(len(operation)):
         expr.append(nums[i])
         expr.append(operation[i])
     expr.append(nums[-1])
 
-    # First pass: handle * and /
     i = 1
     while i < len(expr) - 1:
         op = expr[i]
-        if op == '*' or op == '/':
+        if op in ('*', '/'):
             left = expr[i - 1]
             right = expr[i + 1]
             if op == '*':
                 result = left * right
             else:
                 if right == 0:
-                    print("Error: Division by zero")
+                    screen.delete(0, tk.END)
+                    screen.insert(tk.END, 'Division by zero')
+                    numbers.clear()
+                    operation.clear()
                     return
                 result = left / right
-            # Replace the three elements with the result
             expr[i - 1:i + 2] = [result]
-            i -= 2  # step back to re-check from the previous position
-        i += 2
+            i = 1  # Reset i to check for more multiplications/divisions
+        else:
+            i += 2
 
-    # Second pass: handle + and -
     i = 1
     while i < len(expr) - 1:
         op = expr[i]
@@ -54,18 +74,14 @@ def calculate_result():
         elif op == '-':
             result = left - right
         else:
-            print(f"Unexpected operator {op}")
+            screen.delete(0, tk.END)
+            screen.insert(tk.END, f"Unknown op {op}")
             return
         expr[i - 1:i + 2] = [result]
-        i -= 2
-        i += 2
+        i = 1  # Reset i to start from beginning
 
-    # The final result is...
-    print("Result:", expr[0])
     screen.delete(0, tk.END)
     screen.insert(0, str(expr[0]))
-
-    # Reset numbers and operation for next calculation
     numbers.clear()
     operation.clear()
 
@@ -75,11 +91,19 @@ def print_num():
     print(numbers)
     print(operation)
 
+
 def erase():
     global screen, numbers, operation
     screen.delete(0, tk.END)
     numbers = []
     operation = []
+
+
+def delete_last_char():
+    current = screen.get()
+    if current and current != 'Insert a number':
+        screen.delete(len(current) - 1, tk.END)
+
 
 def print_onto_screen(value):
     global screen
@@ -87,15 +111,22 @@ def print_onto_screen(value):
         screen.delete(0, tk.END)
     screen.insert(tk.END, value)
 
+
 def save_operate(symbol, num):
     global numbers, operation
-    if not num and symbol:
-        screen.insert(tk.END, 'Insert a number')
-    elif num != 'Insert a number' and symbol:
-        numbers.append(num)
-        operation.append(symbol)
+    if num.strip() == '' or num == 'Insert a number':
         screen.delete(0, tk.END)
-        print_num()  # Just to ensure it's working
+        screen.insert(tk.END, 'Insert a number')
+        return
+    try:
+        float(num)  # Validation
+    except ValueError:
+        screen.delete(0, tk.END)
+        screen.insert(tk.END, 'Invalid number')
+        return
+    numbers.append(num)
+    operation.append(symbol)
+    screen.delete(0, tk.END)
 
 
 # Graphical settings
@@ -208,7 +239,11 @@ button_plus = tk.Button(main_window, text='+', width=5, command=lambda: save_ope
 button_plus.grid(row=4, column=3, padx=2, pady=2, sticky="nsew")
 
 button_erase = tk.Button(main_window, text='C', width=5, command=erase)
-button_erase.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=2, pady=2)
+button_erase.grid(row=5, column=0, columnspan=2, padx=2, pady=2, sticky="nsew")
 button_erase.configure(bg="#A5A5A5", fg="#000000")
+
+button_delete = tk.Button(main_window, text='⌫', width=5, command=delete_last_char)
+button_delete.grid(row=5, column=2, columnspan=2, padx=2, pady=2, sticky="nsew")
+button_delete.configure(bg="#A5A5A5", fg="#000000")
 
 main_window.mainloop()
